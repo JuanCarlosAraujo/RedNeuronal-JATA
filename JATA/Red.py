@@ -27,8 +27,9 @@ def get_output(Yd, YR, X, W, U):
         print("salida ", i)
         for j in range(len(X)):
             print("datos actuales:", X[j], W[j][i], U[i])
-            YR[i] += (X[j] * W[j][i]) - U[i]
+            YR[i] += (X[j] * W[j][i]) 
             print("resultado: ", YR[i])
+        YR[i] = YR[i] - U[i]
 
 def output_error(EL,Yd,YR):
     for i in range(len(Yd)):
