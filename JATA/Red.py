@@ -2,37 +2,37 @@ import random
 
 
 def Red():
-    YR=[0] * 3 
-    X = [random.randint(0, 1) for _ in range(5)]
-    print("Entradas: ", X)
-    W=[[random.random() for j in range(3)] for i in range(5)]
-    print("Pesos: ", W )
-    U=[random.random() for _ in range(3)]
-    print("Umbrales: ",U)
-    EL=[0] * 3
-    Yd=[random.randint(0, 1) for _ in range(3)]
-    print("Salidas: ", Yd)
+    salidaSistema=[0] * 3 
+    entradas = [random.randint(0, 1) for _ in range(5)]
+    print("Entradas: ", entradas)
+    pesos=[[random.random() for j in range(3)] for i in range(5)]
+    print("Pesos: ", pesos )
+    umbrales=[random.random() for _ in range(3)]
+    print("Umbrales: ",umbrales)
+    erroresSalida=[0] * 3
+    salidaOriginal=[random.randint(0, 1) for _ in range(3)]
+    print("Salidas: ", salidaOriginal)
  
     #calcular valor de las salidas
-    get_output(Yd, YR, X, W, U)
-    print("Salidas Obtenidas: ", YR)
+    get_output(salidaOriginal, salidaSistema, entradas, pesos, umbrales)
+    print("Salidas Obtenidas: ", salidaSistema)
 
     #Calcular Error por patron
-    output_error(EL,Yd,YR)
-    print("Error por patron:", EL)
+    output_error(erroresSalida,salidaOriginal,salidaSistema)
+    print("Error por patron:", erroresSalida)
 
-def get_output(Yd, YR, X, W, U):
+def get_output(salidaOriginal, salidaSistema, entradas, pesos, umbrales):
     print("calculando salida...")
-    for i in range(len(Yd)):
+    for i in range(len(salidaOriginal)):
         print("salida ", i)
-        for j in range(len(X)):
-            print("datos actuales:", X[j], W[j][i], U[i])
-            YR[i] += (X[j] * W[j][i]) 
-            print("resultado: ", YR[i])
-        YR[i] = YR[i] - U[i]
+        for j in range(len(entradas)):
+            print("datos actuales:", entradas[j], pesos[j][i], umbrales[i])
+            salidaSistema[i] += (entradas[j] * pesos[j][i]) 
+            print("resultado: ", salidaSistema[i])
+        salidaSistema[i] = salidaSistema[i] - umbrales[i]
 
-def output_error(EL,Yd,YR):
-    for i in range(len(Yd)):
-        EL[i] = Yd[i] - YR[i]
+def output_error(erroresSalida, salidaOriginal, salidaSistema):
+    for i in range(len(salidaOriginal)):
+        erroresSalida[i] = salidaOriginal[i] - salidaSistema[i]
 
 
