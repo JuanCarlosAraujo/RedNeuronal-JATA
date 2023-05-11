@@ -3,7 +3,7 @@ import random
 
 def Red():
     errorPatron = 0
-    rataAprendizaje = 0,1
+    rataAprendizaje = 0.1
     salidaSistema=[0] * 3 
     entradas = [random.randint(0, 1) for _ in range(5)]
     print("Entradas: ", entradas)
@@ -48,7 +48,9 @@ def output_error(erroresSalida, salidaOriginal, salidaSistema):
         erroresSalida[i] = salidaOriginal[i] - salidaSistema[i]
 
 def pattern_error(erroresSalida, salidaOriginal, errorPatron):
-    errorPatron = sum(abs(x) for x in erroresSalida) / salidaOriginal
+    for valor in erroresSalida:
+        errorPatron = errorPatron + abs(valor)
+    errorPatron = errorPatron / (len(salidaOriginal))
 
 def update_weights(pesos, salidaOriginal, entradas, rataAprendizaje, erroresSalida):
     for i in range(len(salidaOriginal)):
