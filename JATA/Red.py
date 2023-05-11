@@ -7,14 +7,15 @@ import numpy as np
 
 def Red():
     errorPatron = 0
+    funcionActivacion = ""
     sumatoriaErroresPatron = 0
     errorPermitido = 0.1
     rataAprendizaje = 0.1
     numeroInteracciones = 0
     salidaSistema = [0] * 3
     patrones = []
-    pesos=[[random.random() for j in range(3)] for i in range(5)]
-    umbrales=[random.random() for _ in range(3)]
+    pesos=[]
+    umbrales=[]
     erroresSalida=[0] * 3
     salidaOriginal=[]
  
@@ -45,6 +46,12 @@ def Red():
     
     #Cargar archivo de patrones
     file_upload(patrones, salidaOriginal)
+
+    #Funcion de activacion
+    activation_funcion(funcionActivacion, salidaSistema)
+
+    #Creacion de pesos y umbrales aleatoriamente
+    create_weights_thresholds(patrones, salidaOriginal, pesos, umbrales)
 
 
 def get_output(salidaOriginal, salidaSistema, entradas, pesos, umbrales):
@@ -105,9 +112,7 @@ def file_upload(patrones, salidaOriginal):
     filename = file_path 
     matriz = np.loadtxt(filename)
     columnas = len(matriz[0])
-    print (columnas)
     filas = len(matriz)
-    print(filas)
 
     for i in range(columnas):
         filaEntradas = []
@@ -123,6 +128,26 @@ def file_upload(patrones, salidaOriginal):
                 b = matriz[j][i]
                 filaSalidas.append(b)
             salidaOriginal.append(filaSalidas)
+
+def activation_funcion(funcionActivacion, salidaSistema):
+    columnas = len(salidaSistema[0])
+    filas = len(salidaSistema)
+    if(funcionActivacion == "escalon"):
+        for i in range(columnas):
+            for j in range(1, filas):
+                if(salidaSistema[j][i] < 0):
+                    salidaSistema[j][i] == 0
+                else:
+                    salidaSistema[j][i] == 1
+
+def create_weights_thresholds(patrones, salidaOriginal, pesos, umbrales):
+    numeroEntradas = len(patrones)
+    numeroSalidas = len(salidaOriginal)
+    pesos = [[random.uniform(0, 1) for j in range(numeroSalidas)] for i in range(numeroEntradas)]
+    umbrales = [random.uniform(0, 1) for j in range(numeroSalidas)]
+
+        
+
     
 
 
