@@ -11,6 +11,7 @@ import numpy as np
 
 def ui(page: Page):
     datos=[0,0,0,0,0]
+    errorCargaArchivo = ""
     page.horizontal_alignment = "center"
     page.vertical_alignment = "spaceBetween"
     numeroEntradas = Text(value=datos[0], style="displaySmall",text_align="center",color="GREY800",weight="bold")
@@ -117,43 +118,88 @@ def ui(page: Page):
 
     df = px.data.gapminder().query("continent=='Oceania'")
     fig = px.line(df, x="year", y="lifeExp", color="country")
+
+
+##### ENTRENAR #########################################################################################
+    def close_dlg(e):
+        dlg_modal.open = False
+        page.update()
+
+    dlg_modal = AlertDialog(
+        modal=True,
+        title=Text("¡ERROR!"),
+        content=Text("Error en los campos por favor verifique que no hayan campos vacios o mal escritos"),
+        actions=[
+            TextButton("Aceptar", on_click=close_dlg),
+        ],
+        actions_alignment=MainAxisAlignment.END,
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+    )
+
     red = Red(tasaAprendizaje,iteraciones,funcionActivacion,errorPermitido)
-
     def entrenarRed(e):
+        if(str(funcionActivacion.value) != "" and  str(tasaAprendizaje.value) != "" and str(errorPermitido.value) != "" and str(iteraciones.value) != ""):
+            red.patterns_according_to_interactions(funcionActivacion.value,float(tasaAprendizaje.value),float(errorPermitido.value),int(iteraciones.value))
+        else:
+            page.dialog = dlg_modal
+            dlg_modal.open = True
+            page.update()
 
-        red.patterns_according_to_interactions(funcionActivacion.value,float(tasaAprendizaje.value),float(errorPermitido.value),int(iteraciones.value))
-        
+#######################################################################################################################################        
+####  Cargar Datos ##################################################################################################################
     
-    #Cargar Datos
+
+    def alertaArchivo(e):
+        dlg_errorCargaArchivo.open = False
+        page.update()
+
+    dlg_errorCargaArchivo = AlertDialog(
+        modal=True,
+        title=Text("¡ERROR!"),
+        content=Text("Error al cargar archivo, por favor verifique",str(errorCargaArchivo)),
+        actions=[
+            TextButton("Aceptar", on_click=alertaArchivo),
+        ],
+        actions_alignment=MainAxisAlignment.END,
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+    )
+    
     def cargarDatos(e: FilePickerResultEvent):
+        errorCargaArchivo = "hola"
         selected_files.value = (
             ", ".join(map(lambda f: f.path, e.files)) if e.files else "Cancelled!"
         )
         selected_files.update()
         if(selected_files != "Cancelled"):
-            red.file_upload(selected_files.value)
-            datos[0]=red.numeroEntradas
-            numeroEntradas.value = (datos[0])
-            numeroEntradas.update()
-            datos[1]=red.numeroSalidas
-            numeroSalidas.value = (datos[1])
-            numeroSalidas.update()
-            datos[2]=red.numeroSalidas * red.numeroEntradas
-            numeroPesos.value = (datos[2])
-            numeroPesos.update()
-            datos[3]=red.numeroSalidas
-            numeroUmbrales.value = (datos[3])
-            numeroUmbrales.update()
-            datos[4]=len(red.patrones[0])
-            numeroPatrones.value = (datos[4])
-            numeroPatrones.update()
+            try:
+                red.file_upload(selected_files.value)
+            except Exception as errorArchivo:
+                errorCargaArchivo = str(errorArchivo)
+                page.dialog = dlg_errorCargaArchivo
+                dlg_errorCargaArchivo.open = True
+                page.update()
+            else:
+                
+                datos[0]=red.numeroEntradas
+                numeroEntradas.value = (datos[0])
+                numeroEntradas.update()
+                datos[1]=red.numeroSalidas
+                numeroSalidas.value = (datos[1])
+                numeroSalidas.update()
+                datos[2]=red.numeroSalidas * red.numeroEntradas
+                numeroPesos.value = (datos[2])
+                numeroPesos.update()
+                datos[3]=red.numeroSalidas
+                numeroUmbrales.value = (datos[3])
+                numeroUmbrales.update()
+                datos[4]=len(red.patrones[0])
+                numeroPatrones.value = (datos[4])
+                numeroPatrones.update()
         
 
     pick_files_dialog = FilePicker(on_result=cargarDatos)
     selected_files = Text()
-    
 
-    #
     subirDatos=ElevatedButton(
         bgcolor=colors.GREEN_600,
         color="white",
@@ -177,7 +223,7 @@ def ui(page: Page):
         ),
         on_click= lambda _: pick_files_dialog.pick_files(allow_multiple=True),
     )
-
+############################################################################################
     page.overlay.append(pick_files_dialog)
     # add controls on Page
     page.add(
