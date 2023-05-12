@@ -1,12 +1,13 @@
 from Red import Red
-
+from GUI import ui
 
 
 
 
 def main():
 
-    Red()
+    #Red()
+    ui()
 
 
 
