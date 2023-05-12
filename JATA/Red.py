@@ -45,16 +45,16 @@ class Red():
     def pattern_error(self):
         for valor in self.erroresSalida:
             errorPatron = errorPatron + abs(valor)
-        errorPatron = errorPatron / (len(self.salidaOriginal))
+        errorPatron = errorPatron / (self.numeroSalidas)
         return errorPatron
 
-    def update_weights(self,rataAprendizaje):
-        for i in range(len(self.salidaOriginal)):
+    def update_weights(self, rataAprendizaje, entradas):
+        for i in range(self.numeroSalidas):
             for j in range(len(self.patrones)):
                 self.pesos[j][i] = self.pesos[j][i] + rataAprendizaje * self.erroresSalida[i] * self.entradas[j]
 
     def update_thresholds(self,rataAprendizaje):
-        for i in range(len(self.salidaOriginal)):
+        for i in range(self.numeroSalidas):
             self.umbrales[i] = self.umbrales[i] + rataAprendizaje * self.erroresSalida[i] * 1
 
     def error_checking(self, errorPermitido):
@@ -64,13 +64,17 @@ class Red():
             return False
 
     def analysis_of_all_patterns(self,funcionActivacion, rataAprendizaje, errorPermitido):
+        matrizCorrectora = []
         for i in range(len(self.patrones)): 
             columna = [fila[i] for fila in self.patrones]
+            columnaSalida = [fila2[i] for fila2 in self.salidaOriginal]
+            matrizCorrectora.append(columnaSalida)
             self.salidaSistema.append(self.get_output(columna))
             self.output_error()
             sumatoriaErroresPatron = self.pattern_error() + sumatoriaErroresPatron
-            self.update_weights(rataAprendizaje)
+            self.update_weights(rataAprendizaje, columna)
             self.update_thresholds(rataAprendizaje)
+        self.salidaOriginal=matrizCorrectora
         self.activation_funcion(funcionActivacion)
         return self.error_checking(errorPermitido)
 
