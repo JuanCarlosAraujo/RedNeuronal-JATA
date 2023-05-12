@@ -6,8 +6,7 @@ import random
 import tkinter as tk
 from tkinter import filedialog
 import numpy as np
-
-
+import plotly.graph_objects as go
 
 def ui(page: Page):
     datos=[0,0,0,0,0]
@@ -19,6 +18,10 @@ def ui(page: Page):
     numeroPesos = Text(value=datos[2], style="displaySmall",text_align="center",color="GREY800",weight="bold")
     numeroUmbrales = Text(value=datos[3], style="displaySmall",text_align="center",color="GREY800",weight="bold")
     numeroPatrones = Text(value=datos[4], style="displaySmall",text_align="center",color="GREY800",weight="bold")
+    numeroIteraciones = Text(value="0", style="displaySmall",text_align="center",color="GREY800")
+    errorFinal = Text(value="0", style="displaySmall",text_align="center",color="GREY800")
+    rata=Text(value="0", style="displaySmall",text_align="center",color="GREY800")
+    
     #red = Red(tasaAprendizaje,iteraciones,funcionActivacion,errorPermitido)
 
 
@@ -116,11 +119,21 @@ def ui(page: Page):
         )
     )
 
-    df = px.data.gapminder().query("continent=='Oceania'")
-    fig = px.line(df, x="year", y="lifeExp", color="country")
+
 
 
 ##### ENTRENAR #########################################################################################
+
+    salidaOF = []
+    salidaOC = []
+    salidaSF = []
+    salidaSC = []
+    
+    fig = go.Figure()
+    figura=PlotlyChart(fig, expand=True)
+
+
+
     def close_dlg(e):
         dlg_modal.open = False
         page.update()
@@ -138,12 +151,46 @@ def ui(page: Page):
 
     red = Red(tasaAprendizaje,iteraciones,funcionActivacion,errorPermitido)
     def entrenarRed(e):
+        red.sumatoriaErroresPatron = 0.0
+        red.create_weights_thresholds()
+        red.numeroInteracciones = 0
         if(str(funcionActivacion.value) != "" and  str(tasaAprendizaje.value) != "" and str(errorPermitido.value) != "" and str(iteraciones.value) != ""):
-            red.patterns_according_to_interactions(funcionActivacion.value,float(tasaAprendizaje.value),float(errorPermitido.value),int(iteraciones.value))
+            iteracionesRealizadas = red.patterns_according_to_interactions(funcionActivacion.value,float(tasaAprendizaje.value),float(errorPermitido.value),int(iteraciones.value))
+            print("ya")
+            print("error:",red.sumatoriaErroresPatron)
+            print("salidas",red.salidaSistema)
+            print("iteraciones:", iteracionesRealizadas)
+            numeroIteraciones.value = str(iteracionesRealizadas)
+            numeroIteraciones.update()
+            errorFinal.value = str(round(red.sumatoriaErroresPatron,4))
+            errorFinal.update()
+            rata.value = str(tasaAprendizaje.value)
+            rata.update()
+            print(str(funcionActivacion.value))
+
+            matrizSC = np.array(red.salidaSistema)
+            matrizOC = np.array(red.salidaOriginal)
+            salidaOC = matrizOC.flatten()
+            salidaSC= matrizSC.flatten()
+            salidaSCR = [round(valor,3) for valor in salidaOC]
+            salidaOCR = [round(valor,3) for valor in salidaSC]
+            fig.update_traces(y=salidaSCR,selector=dict(name='Salidas esperadas'))
+            fig.update_traces(y=salidaOCR,selector=dict(name='Salidas obtenidas'))
+            
+            figura.update()
+            
         else:
             page.dialog = dlg_modal
             dlg_modal.open = True
             page.update()
+
+    x=[1,2,3,4,5,6,7,8,9,10,11,12,13]
+    fig.add_trace(go.Scatter(y=salidaOC,
+        mode='lines',
+        name='Salidas esperadas'))
+    fig.add_trace(go.Scatter(y=salidaSC,
+        mode='lines+markers',
+        name='Salidas obtenidas'))
 
 #######################################################################################################################################        
 ####  Cargar Datos ##################################################################################################################
@@ -417,7 +464,7 @@ def ui(page: Page):
                                                     height=500,
                                                     margin=margin.only(top=-90),
                                                     padding=padding.all(20),
-                                                    content=PlotlyChart(fig, expand=True)
+                                                    content=figura
                                                 )
                                             ]
                                         )
@@ -467,7 +514,7 @@ def ui(page: Page):
                                                             content=Column(
                                                                 alignment=MainAxisAlignment.CENTER,
                                                                 controls=[
-                                                                    Text(value=datos[0], style="displaySmall",text_align="center",color="GREY800"),
+                                                                    numeroIteraciones,
                                                                     Text("Iteracciones realizadas", style="bodySmall",color="GREY800")
                                                                 ],
                                                             ),
@@ -483,7 +530,7 @@ def ui(page: Page):
                                                             content=Column(
                                                                 alignment=MainAxisAlignment.CENTER,
                                                                 controls=[
-                                                                    Text(value=datos[2], style="displaySmall",text_align="center",color="BLACK",weight="bold"),
+                                                                    errorFinal,
                                                                     Text("Error final", style="bodySmall",color="BLACK")
                                                                 ],
                                                             ),
@@ -499,7 +546,7 @@ def ui(page: Page):
                                                             content=Column(
                                                                 alignment=MainAxisAlignment.CENTER,
                                                                 controls=[
-                                                                    Text(value=datos[3], style="displaySmall",text_align="center",color="GREY900",weight="bold"),
+                                                                    rata,
                                                                     Text("RATA", style="bodySmall",color="GREY800")
                                                                 ],
                                                             ),

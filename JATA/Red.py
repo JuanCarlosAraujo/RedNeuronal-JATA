@@ -8,9 +8,9 @@ import numpy as np
 class Red():
     def __init__(self, rata, iteraciones,funActivacion,errorPermitido):
 
-        self.errorPatron = 0
+        self.errorPatron = 0.0
         self.funcionActivacion = funActivacion
-        self.sumatoriaErroresPatron = 0
+        self.sumatoriaErroresPatron = 0.0
         self.errorPermitido = errorPermitido
         self.rataAprendizaje = rata
         self.numeroInteracciones = iteraciones
@@ -41,13 +41,12 @@ class Red():
 
         for i in range(self.numeroSalidas):
             self.erroresSalida[i] = salidaOrigina[i] - salidaSistema[i]
-
     def pattern_error(self):
         
         for valor in range(self.numeroSalidas):
             self.errorPatron += self.erroresSalida[valor]
         self.errorPatron /= (self.numeroSalidas)
-        print(self.errorPatron)
+        print("error de esta iteracion",self.errorPatron)
         return self.errorPatron
 
     def update_weights(self, rataAprendizaje, entradas):
@@ -66,31 +65,30 @@ class Red():
             return False
 
     def analysis_of_all_patterns(self,funcionActivacion, rataAprendizaje, errorPermitido):
-        matrizCorrectora = []
-        sumatoriaErroresPatron=0
-        print(self.patrones)
-        for i in range(len(self.patrones)): 
-            columna = [fila[i] for fila in self.patrones]
-            print(self.patrones)
-            columnaSalida = [fila2[i] for fila2 in self.salidaOriginal]
-            matrizCorrectora.append(columnaSalida)
-            self.salidaSistema.append(self.get_output(columna))
-            columnaSalidaSistema = [fila3[i] for fila3 in self.salidaSistema]
-            print("SALIDA SISTEmA",columnaSalidaSistema)
-            print("SALIDA Ori",columnaSalida)
-            self.output_error(columnaSalida, columnaSalidaSistema)
-            sumatoriaErroresPatron = self.pattern_error() + sumatoriaErroresPatron
-            self.update_weights(rataAprendizaje, columna)
+        self.salidaSistema = []
+        for i in range(len(self.patrones[0])):
+            print(len(self.patrones[0]))
+            columnaPatrones = [fila[i] for fila in self.patrones]
+            columnaSalidas = [fila[i] for fila in self.salidaOriginal]
+            #columnaSalidasSistema = [fila[i] for fila in self.salidaOriginal]
+            print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            print("columnaPatrones:",columnaPatrones)
+            print("SO", columnaSalidas)
+            #matrizCorrectora.append(self.columnaSalidas)
+            self.salidaSistema.append(self.get_output(columnaPatrones))
+            self.output_error(columnaSalidas, self.salidaSistema[i])
+            self.sumatoriaErroresPatron = (self.pattern_error() + self.sumatoriaErroresPatron) / 2
+            self.update_weights(rataAprendizaje, columnaPatrones)
             self.update_thresholds(rataAprendizaje)
-        self.salidaOriginal=matrizCorrectora
+        #self.salidaOriginal=matrizCorrectora
         self.activation_funcion(funcionActivacion)
         return self.error_checking(errorPermitido)
 
     def patterns_according_to_interactions(self,funcionActivacion, rataAprendizaje, errorPermitido, numeroInteracciones):
         for i in range(numeroInteracciones):
             if (self.analysis_of_all_patterns(funcionActivacion,rataAprendizaje, errorPermitido) == True):
-                return i
-        return numeroInteracciones
+                return int(i)
+        return int(numeroInteracciones)
 
     def file_upload(self,filename):
 
@@ -121,11 +119,11 @@ class Red():
         filas = len(self.salidaSistema)
         if(funcionActivacion == "Perceptron"):
             for i in range(columnas):
-                for j in range(1, filas):
+                for j in range(0, filas):
                     if(self.salidaSistema[j][i] < 0):
-                        self.salidaSistema[j][i] == 0
+                        self.salidaSistema[j][i] = 0
                     else:
-                        self.salidaSistema[j][i] == 1
+                        self.salidaSistema[j][i] = 1
 
     def create_weights_thresholds(self):
         self.numeroEntradas = len(self.patrones)
