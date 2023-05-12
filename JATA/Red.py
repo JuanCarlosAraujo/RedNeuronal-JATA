@@ -35,23 +35,25 @@ class Red():
             salida[i] = salida[i] - self.umbrales[i]
         return salida
     
-    def output_error(self):
+    def output_error(self,salidaOrigina, salidaSistema):
 
         self.erroresSalida = [0] * self.numeroSalidas
 
         for i in range(self.numeroSalidas):
-            self.erroresSalida[i] = self.salidaOriginal[i] - self.salidaSistema[i]
+            self.erroresSalida[i] = salidaOrigina[i] - salidaSistema[i]
 
     def pattern_error(self):
-        for valor in self.erroresSalida:
-            errorPatron = errorPatron + abs(valor)
-        errorPatron = errorPatron / (self.numeroSalidas)
-        return errorPatron
+        
+        for valor in range(self.numeroSalidas):
+            self.errorPatron += self.erroresSalida[valor]
+        self.errorPatron /= (self.numeroSalidas)
+        print(self.errorPatron)
+        return self.errorPatron
 
     def update_weights(self, rataAprendizaje, entradas):
         for i in range(self.numeroSalidas):
             for j in range(len(self.patrones)):
-                self.pesos[j][i] = self.pesos[j][i] + rataAprendizaje * self.erroresSalida[i] * self.entradas[j]
+                self.pesos[j][i] = self.pesos[j][i] + rataAprendizaje * self.erroresSalida[i] * entradas[j]
 
     def update_thresholds(self,rataAprendizaje):
         for i in range(self.numeroSalidas):
@@ -65,12 +67,18 @@ class Red():
 
     def analysis_of_all_patterns(self,funcionActivacion, rataAprendizaje, errorPermitido):
         matrizCorrectora = []
+        sumatoriaErroresPatron=0
+        print(self.patrones)
         for i in range(len(self.patrones)): 
             columna = [fila[i] for fila in self.patrones]
+            print(self.patrones)
             columnaSalida = [fila2[i] for fila2 in self.salidaOriginal]
             matrizCorrectora.append(columnaSalida)
             self.salidaSistema.append(self.get_output(columna))
-            self.output_error()
+            columnaSalidaSistema = [fila3[i] for fila3 in self.salidaSistema]
+            print("SALIDA SISTEmA",columnaSalidaSistema)
+            print("SALIDA Ori",columnaSalida)
+            self.output_error(columnaSalida, columnaSalidaSistema)
             sumatoriaErroresPatron = self.pattern_error() + sumatoriaErroresPatron
             self.update_weights(rataAprendizaje, columna)
             self.update_thresholds(rataAprendizaje)
@@ -104,6 +112,8 @@ class Red():
                     b = matriz[j][i]
                     filaSalidas.append(b)
                 self.salidaOriginal.append(filaSalidas)
+        print("salidasOriginales", self.salidaOriginal)
+        print("aqui termina")
         self.create_weights_thresholds()
 
     def activation_funcion(self,funcionActivacion):
