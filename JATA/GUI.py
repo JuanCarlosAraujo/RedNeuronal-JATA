@@ -154,6 +154,7 @@ def ui(page: Page):
         red.sumatoriaErroresPatron = 0.0
         red.create_weights_thresholds()
         red.numeroInteracciones = 0
+        red.salidaSistema = []
         if(str(funcionActivacion.value) != "" and  str(tasaAprendizaje.value) != "" and str(errorPermitido.value) != "" and str(iteraciones.value) != ""):
             iteracionesRealizadas = red.patterns_according_to_interactions(funcionActivacion.value,float(tasaAprendizaje.value),float(errorPermitido.value),int(iteraciones.value))
             print("ya")

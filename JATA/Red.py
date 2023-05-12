@@ -36,16 +36,14 @@ class Red():
         return salida
     
     def output_error(self,salidaOrigina, salidaSistema):
-
-        self.erroresSalida = [0] * self.numeroSalidas
-
         for i in range(self.numeroSalidas):
-            self.erroresSalida[i] = salidaOrigina[i] - salidaSistema[i]
+            self.erroresSalida.append(salidaOrigina[i] - salidaSistema[i])
+        print(self.erroresSalida)
     def pattern_error(self):
         
-        for valor in range(self.numeroSalidas):
-            self.errorPatron += self.erroresSalida[valor]
-        self.errorPatron /= (self.numeroSalidas)
+        
+        #print(self.errorPatron)
+        self.errorPatron = sum(abs(valor) for valor in self.erroresSalida) / len(self.erroresSalida)
         print("error de esta iteracion",self.errorPatron)
         return self.errorPatron
 
@@ -59,13 +57,17 @@ class Red():
             self.umbrales[i] = self.umbrales[i] + rataAprendizaje * self.erroresSalida[i] * 1
 
     def error_checking(self, errorPermitido):
-        if(self.sumatoriaErroresPatron <= errorPermitido):
+        if(self.sumatoriaErroresPatron <= errorPermitido and self.sumatoriaErroresPatron >= 0):
             return True
         else:
             return False
 
-    def analysis_of_all_patterns(self,funcionActivacion, rataAprendizaje, errorPermitido):
+    def analysis_of_all_patterns(self,funcionActivacion, rataAprendizaje, errorPermitido,iteracion):
         self.salidaSistema = []
+        self.erroresSalida = [0] * self.numeroSalidas 
+        self.errorPatron = []
+        print("hola soy salida")
+        self.sumatoriaErroresPatron = 0.0
         for i in range(len(self.patrones[0])):
             print(len(self.patrones[0]))
             columnaPatrones = [fila[i] for fila in self.patrones]
@@ -77,16 +79,17 @@ class Red():
             #matrizCorrectora.append(self.columnaSalidas)
             self.salidaSistema.append(self.get_output(columnaPatrones))
             self.output_error(columnaSalidas, self.salidaSistema[i])
-            self.sumatoriaErroresPatron = (self.pattern_error() + self.sumatoriaErroresPatron) / 2
+            self.sumatoriaErroresPatron = ( self.pattern_error() + self.sumatoriaErroresPatron ) / iteracion
             self.update_weights(rataAprendizaje, columnaPatrones)
             self.update_thresholds(rataAprendizaje)
         #self.salidaOriginal=matrizCorrectora
+        #self.sumatoriaErroresPatron /= self.numeroEntradas
         self.activation_funcion(funcionActivacion)
         return self.error_checking(errorPermitido)
 
     def patterns_according_to_interactions(self,funcionActivacion, rataAprendizaje, errorPermitido, numeroInteracciones):
         for i in range(numeroInteracciones):
-            if (self.analysis_of_all_patterns(funcionActivacion,rataAprendizaje, errorPermitido) == True):
+            if (self.analysis_of_all_patterns(funcionActivacion,rataAprendizaje, errorPermitido,i) == True):
                 return int(i)
         return int(numeroInteracciones)
 
